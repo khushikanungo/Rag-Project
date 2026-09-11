@@ -1,4 +1,3 @@
-"""Prompt templates for the RAG path and the plain/general path. """
 """
 Two templates: one for document-grounded answers (retrieved context +
 citation instructions), one for plain general chat. routing/query_router.py

@@ -1,4 +1,3 @@
-"""Pydantic answer schema + output parser (answer + citations). """
 """
 Defines the structured shape every answer must return — separated so
 prompt.py can inject format instructions and the backend can validate the
