@@ -1,1 +1,126 @@
-[]
+[
+  {
+    "question": "What problem did LangChain aim to solve when building LLM applications manually?",
+    "ground_truth": "Before LangChain, developers had to manually handle API calls, response parsing, prompt construction, document insertion, and conversation history. There was no common interface across model providers, so switching providers often required rewriting integration code."
+  },
+  {
+    "question": "What is Runnable in LangChain?",
+    "ground_truth": "Runnable is a universal contract and common abstraction in LangChain. Components such as prompt templates, models, output parsers, and retrievers can derive from Runnable, giving them a common invoke() method and allowing them to be connected with the pipe operator (|)."
+  },
+  {
+    "question": "What are the two major benefits provided by the Runnable abstraction?",
+    "ground_truth": "Runnable gives components a common invoke() method so they can be called consistently, and it allows components to be joined into chains using the pipe operator (|), such as prompt | model | output_parser."
+  },
+  {
+    "question": "What is the difference between BaseLLM and BaseChatModel?",
+    "ground_truth": "BaseLLM represents the old string-in/string-out style: it takes a single string and returns a string. BaseChatModel represents the chat style: it takes a list of structured messages and returns an AIMessage object."
+  },
+  {
+    "question": "Why does LangChain use abstract base classes for BaseLLM and BaseChatModel?",
+    "ground_truth": "Python does not have an explicit interface keyword like Java, so LangChain uses Abstract Base Classes (ABC) to define the required contract that model providers must implement."
+  },
+  {
+    "question": "Which abstract method must a BaseLLM implementation provide?",
+    "ground_truth": "A BaseLLM implementation must provide the _call(prompt: str, ...) -> str method."
+  },
+  {
+    "question": "Which abstract method must a BaseChatModel implementation provide?",
+    "ground_truth": "A BaseChatModel implementation must provide the _generate(messages: List[BaseMessage], ...) -> ChatResult method."
+  },
+  {
+    "question": "Do provider implementations need to write invoke() themselves?",
+    "ground_truth": "No. Providers do not need to implement invoke() themselves. LangChain already provides invoke(), which internally calls _call() for BaseLLM or _generate() for BaseChatModel."
+  },
+  {
+    "question": "What are SystemMessage, HumanMessage, and AIMessage used for?",
+    "ground_truth": "SystemMessage contains instructions or the model persona, HumanMessage represents the user's input, and AIMessage represents the model's response or a previous AI turn in conversation history."
+  },
+  {
+    "question": "Why are structured messages better than the old BaseLLM string style for conversations?",
+    "ground_truth": "Structured messages clearly identify the role of each message, such as system, human, or AI. This avoids the ambiguity and fragility of combining everything into one plain string."
+  },
+  {
+    "question": "How does a provider decide whether to implement BaseLLM or BaseChatModel?",
+    "ground_truth": "The provider chooses based on the nature of its underlying API. If the API is completion-style and accepts raw text, it can implement BaseLLM. If the API is message-based, it can implement BaseChatModel."
+  },
+  {
+    "question": "Why does HuggingFacePipeline use a two-step wrapping approach for chat?",
+    "ground_truth": "HuggingFacePipeline is fundamentally an old-style text-generation component implementing BaseLLM. ChatHuggingFace wraps that object and implements BaseChatModel so structured chat messages can be converted into the text format expected by the underlying HuggingFace pipeline."
+  },
+  {
+    "question": "What does ChatHuggingFace do with structured messages before calling the HuggingFace pipeline?",
+    "ground_truth": "ChatHuggingFace uses the model tokenizer's apply_chat_template() function to convert the structured messages into the exact prompt-string format the model was trained on, and then passes that formatted string to the underlying HuggingFacePipeline."
+  },
+  {
+    "question": "How does ChatHuggingFace convert the HuggingFace response back into LangChain's chat representation?",
+    "ground_truth": "It takes the raw text returned by the HuggingFace pipeline and packs it into an AIMessage object, satisfying the BaseChatModel contract."
+  },
+  {
+    "question": "Why does ChatOpenAI not require a visible wrapper like ChatHuggingFace?",
+    "ground_truth": "OpenAI's Chat Completions API is already message-based and accepts role-based messages. Therefore, ChatOpenAI can directly implement BaseChatModel without wrapping an old string-based class."
+  },
+  {
+    "question": "What is the main difference between ChatHuggingFace and ChatOpenAI in the architecture described in the notes?",
+    "ground_truth": "ChatHuggingFace adds a translation wrapper around a BaseLLM because the underlying HuggingFace text-generation pipeline is string-based. ChatOpenAI can directly implement BaseChatModel because its underlying API is already structured around messages."
+  },
+  {
+    "question": "What happens internally when invoke() is called on a LangChain model?",
+    "ground_truth": "invoke() is called on the Runnable, and for a model it internally triggers _call() for a BaseLLM or _generate() for a BaseChatModel. The provider response is then converted into LangChain's standard representation and returned through invoke()."
+  },
+  {
+    "question": "How does LangChain handle a ChatPromptValue when the next model is a BaseLLM?",
+    "ground_truth": "LangChain calls to_string(), which collapses the messages into a flat string such as a system and human prompt represented in text form."
+  },
+  {
+    "question": "How does LangChain handle a ChatPromptValue when the next model is a BaseChatModel?",
+    "ground_truth": "LangChain calls to_messages(), so the messages remain as a list of structured messages without being flattened into a single string."
+  },
+  {
+    "question": "What is the output type of a BaseLLM compared with a BaseChatModel?",
+    "ground_truth": "A BaseLLM returns a plain string, while a BaseChatModel returns an AIMessage object."
+  },
+  {
+    "question": "What does StrOutputParser do?",
+    "ground_truth": "StrOutputParser converts the model output into a clean string. If it receives an AIMessage, it extracts the .content field; if it receives a string, it passes the string through unchanged."
+  },
+  {
+    "question": "Does the output parser perform prompt cleaning or add extra intelligence?",
+    "ground_truth": "No. The output parser mainly performs type conversion. The differences in prompt and output shape have already been determined earlier by the model interface and execution flow."
+  },
+  {
+    "question": "What is the purpose of a structured output parser such as PydanticOutputParser?",
+    "ground_truth": "A structured output parser can convert raw text or JSON into a defined Python object, making the model output suitable for structured downstream use."
+  },
+  {
+    "question": "What are the main components of the RAG pipeline described in the notes?",
+    "ground_truth": "The RAG pipeline contains a retriever that pulls relevant documents from a vector store, a prompt template that combines retrieved context with the user's question, a model that generates the answer, and an output parser that produces the final clean answer."
+  },
+  {
+    "question": "Why can the entire RAG pipeline be connected into one LangChain chain?",
+    "ground_truth": "Because the components involved, including the retriever, prompt, model, and output parser, are Runnables. They share the invoke()-based interface and can therefore be connected using the pipe operator."
+  },
+  {
+    "question": "What does RunnablePassthrough do in the RAG chain shown in the notes?",
+    "ground_truth": "RunnablePassthrough passes the user's question through unchanged so it can be supplied to the question field while the retriever and document formatter provide the context field."
+  },
+  {
+    "question": "What is the execution flow of chain = prompt | model | output_parser?",
+    "ground_truth": "First the prompt fills its placeholders and creates the prompt value. The model receives either a flattened string or structured messages depending on its interface, generates a response, and returns either a string or AIMessage. The output parser then converts that result into the final clean string."
+  },
+  {
+    "question": "Why can changing the model provider be relatively simple in the LangChain architecture described?",
+    "ground_truth": "Because the prompt, retriever, parser, and other pipeline components use common Runnable interfaces. Once the provider-specific model follows the BaseLLM or BaseChatModel contract, the rest of the pipeline can remain the same while the model line is changed."
+  },
+  {
+    "question": "What is the purpose of ChatPromptTemplate in the example from the notes?",
+    "ground_truth": "ChatPromptTemplate creates a structured chat prompt containing messages such as a system instruction with a context placeholder and a user message containing the question placeholder."
+  },
+  {
+    "question": "What does the example BaseLLM implementation demonstrate?",
+    "ground_truth": "It demonstrates the string-in/string-out model style. A concrete LLM class implements _call(), receives a prompt string, calls a string-based API, and returns a string."
+  },
+  {
+    "question": "What does the example BaseChatModel implementation demonstrate?",
+    "ground_truth": "It demonstrates the messages-in/AIMessage-out style. The model implements _generate(), receives a list of messages, calls a chat API, creates an AIMessage from the returned text, and returns it inside a ChatResult."
+  }
+]
